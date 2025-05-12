@@ -5,81 +5,150 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
+        :root {
+            --primary-dark: #1a237e;
+            --primary: #3f51b5;
+            --primary-light: #7986cb;
+            --accent: #536dfe;
+        }
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Arial, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
-            background-color: #f0f2f5;
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
             flex-direction: column;
+            color: white;
         }
+
         .container {
             text-align: center;
-            padding: 20px;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
             max-width: 80%;
             width: 400px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
+
         .loading {
             margin: 20px 0;
             font-size: 18px;
+            color: rgba(255, 255, 255, 0.9);
         }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+            position: relative;
+            margin: 20px 0;
+        }
+
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 30%;
+            background: linear-gradient(90deg, var(--accent), var(--primary-light));
+            animation: progress 1.5s ease-in-out infinite;
+            border-radius: 2px;
+        }
+
+        @keyframes progress {
+            0% {
+                left: -30%;
+            }
+            100% {
+                left: 100%;
+            }
+        }
+
         .error {
-            color: #dc3545;
+            color: #ff5252;
             margin: 20px 0;
             display: none;
+            background: rgba(255, 59, 59, 0.1);
+            padding: 15px;
+            border-radius: 8px;
         }
+
         .button {
-            background-color: #007bff;
+            background: linear-gradient(45deg, var(--accent), var(--primary-light));
             color: white;
-            padding: 10px 20px;
+            padding: 12px 24px;
             border: none;
-            border-radius: 4px;
+            border-radius: 8px;
             cursor: pointer;
             text-decoration: none;
             display: inline-block;
-            margin-top: 10px;
+            margin-top: 15px;
             font-size: 16px;
+            font-weight: 500;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
+
         .button:hover {
-            background-color: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
         }
+
         .logo {
-            width: 100px;
-            height: 100px;
+            width: 120px;
+            height: 120px;
             margin-bottom: 20px;
+            border-radius: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
+
         .status {
             font-size: 14px;
-            color: #666;
+            color: rgba(255, 255, 255, 0.7);
             margin-top: 20px;
         }
+
         .github-link {
-            color: #666;
+            color: rgba(255, 255, 255, 0.7);
             text-decoration: none;
             font-size: 12px;
             margin-top: 20px;
             display: block;
+            transition: color 0.2s;
         }
+
         .github-link:hover {
-            color: #007bff;
+            color: white;
+        }
+
+        h1 {
+            margin: 15px 0;
+            font-weight: 600;
+            color: white;
+            font-size: 28px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <img src="https://github.com/le0nardomartins.png" alt="Lumina Mobile" class="logo" onerror="this.src='https://via.placeholder.com/100'">
+        <img src="assets/logo.png" alt="Lumina Mobile" class="logo" onerror="this.src='https://github.com/le0nardomartins.png'">
         <h1>Lumina Mobile App</h1>
         <div class="loading">Carregando endereço do aplicativo...</div>
+        <div class="progress-bar"></div>
         <div class="error" id="errorMessage">
             O aplicativo parece estar offline no momento.<br>
             Por favor, tente novamente mais tarde.
         </div>
-        <a href="#" class="button" id="accessButton" style="display: none;">Acessar Aplicativo</a>
+        <a href="#" class="button" id="accessButton" style="display: none;">Tentar Novamente</a>
         <div class="status" id="statusMessage"></div>
         <a href="https://github.com/le0nardomartins" target="_blank" class="github-link">Desenvolvido por @le0nardomartins</a>
     </div>
@@ -100,13 +169,13 @@
                 if (!response.ok) throw new Error('Configuração não encontrada');
                 
                 const data = await response.json();
-                if (!data.url) throw new Error('URL não encontrada');
+                if (!data.public_url) throw new Error('URL não encontrada');
 
                 updateStatus('Testando conexão com o aplicativo...');
                 try {
-                    const ngrokResponse = await fetch(data.url, { mode: 'no-cors' });
+                    const ngrokResponse = await fetch(data.public_url, { mode: 'no-cors' });
                     updateStatus('Redirecionando...');
-                    window.location.href = data.url;
+                    window.location.href = data.public_url;
                 } catch (error) {
                     throw new Error('Aplicativo offline');
                 }
