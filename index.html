@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Lumina Mobile - Acesso</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f2f5;
+            flex-direction: column;
+        }
+        .container {
+            text-align: center;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            max-width: 80%;
+            width: 400px;
+        }
+        .loading {
+            margin: 20px 0;
+            font-size: 18px;
+        }
+        .error {
+            color: #dc3545;
+            margin: 20px 0;
+            display: none;
+        }
+        .button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 10px;
+            font-size: 16px;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+        .logo {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 20px;
+        }
+        .status {
+            font-size: 14px;
+            color: #666;
+            margin-top: 20px;
+        }
+        .github-link {
+            color: #666;
+            text-decoration: none;
+            font-size: 12px;
+            margin-top: 20px;
+            display: block;
+        }
+        .github-link:hover {
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="https://github.com/le0nardomartins.png" alt="Lumina Mobile" class="logo" onerror="this.src='https://via.placeholder.com/100'">
+        <h1>Lumina Mobile App</h1>
+        <div class="loading">Carregando endereço do aplicativo...</div>
+        <div class="error" id="errorMessage">
+            O aplicativo parece estar offline no momento.<br>
+            Por favor, tente novamente mais tarde.
+        </div>
+        <a href="#" class="button" id="accessButton" style="display: none;">Acessar Aplicativo</a>
+        <div class="status" id="statusMessage"></div>
+        <a href="https://github.com/le0nardomartins" target="_blank" class="github-link">Desenvolvido por @le0nardomartins</a>
+    </div>
+
+    <script>
+        const CONFIG_URL = 'https://raw.githubusercontent.com/le0nardomartins/Lumina-Mobile-Access/main/ngrok-config.json';
+        let retryCount = 0;
+        const maxRetries = 3;
+
+        function updateStatus(message) {
+            document.getElementById('statusMessage').textContent = message;
+        }
+
+        async function checkAndRedirect() {
+            try {
+                updateStatus('Verificando configuração...');
+                const response = await fetch(CONFIG_URL + '?t=' + new Date().getTime());
+                if (!response.ok) throw new Error('Configuração não encontrada');
+                
+                const data = await response.json();
+                if (!data.url) throw new Error('URL não encontrada');
+
+                updateStatus('Testando conexão com o aplicativo...');
+                try {
+                    const ngrokResponse = await fetch(data.url, { mode: 'no-cors' });
+                    updateStatus('Redirecionando...');
+                    window.location.href = data.url;
+                } catch (error) {
+                    throw new Error('Aplicativo offline');
+                }
+            } catch (error) {
+                retryCount++;
+                if (retryCount < maxRetries) {
+                    updateStatus(`Tentativa ${retryCount} de ${maxRetries}...`);
+                    setTimeout(checkAndRedirect, 2000);
+                } else {
+                    document.querySelector('.loading').style.display = 'none';
+                    document.getElementById('errorMessage').style.display = 'block';
+                    document.getElementById('accessButton').style.display = 'inline-block';
+                    updateStatus('Falha na conexão');
+                    document.getElementById('accessButton').onclick = () => {
+                        retryCount = 0;
+                        document.querySelector('.loading').style.display = 'block';
+                        document.getElementById('errorMessage').style.display = 'none';
+                        document.getElementById('accessButton').style.display = 'none';
+                        updateStatus('Tentando novamente...');
+                        checkAndRedirect();
+                    };
+                }
+            }
+        }
+
+        checkAndRedirect();
+    </script>
+</body>
+</html> 
