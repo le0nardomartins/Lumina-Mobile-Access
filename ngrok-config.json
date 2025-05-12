@@ -1,3 +1,1 @@
-{
-    "url": "https://exemplo-inicial.ngrok.io"
-} 
+{ "url": "{"tunnels":[{"name":"command_line","ID":"044159f4106b61589fcc025d824b1326","uri":"/api/tunnels/command_line","public_url":"https://92e9-2804-1b3-ae83-bae2-a545-a396-91e8-a9e.ngrok-free.app","proto":"https","config":{"addr":"http://localhost:8081","inspect":true},"metrics":{"conns":{"count":0,"gauge":0,"rate1":0,"rate5":0,"rate15":0,"p50":0,"p90":0,"p95":0,"p99":0},"http":{"count":0,"rate1":0,"rate5":0,"rate15":0,"p50":0,"p90":0,"p95":0,"p99":0}}}],"uri":"/api/tunnels"}" } 
